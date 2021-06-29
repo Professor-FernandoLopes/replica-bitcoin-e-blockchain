@@ -1,6 +1,6 @@
 const express = require('express');
-const bodyParser = require('body-parser')
 const Blockchain = require("../blockchain")
+const path= require('path')
 const P2pServer= require("./p2p-server.js")
 const Wallet = require('../wallet');
 const TransactionPool = require('../wallet/transaction-pool');
@@ -14,10 +14,10 @@ const tp = new TransactionPool();
 // servidor p2p recebe uma instância da blockchain
 const p2pServer = new P2pServer(bc,tp);
 
-app.use(bodyParser.json())
+app.use(express.json())
+app.use(express.static(path.join(__dirname,"../client/dist")))
 
 app.get( '/blocks', (req, res) => {
-
 res.json(bc.chain);
 
 });
@@ -51,9 +51,15 @@ ao pool de transações.
     res.redirect('/transactions');
   });
 
-  app.get('/public-key',(req,res)=>{
-    res.json({publicKey:wallet.publicKey}) 
+  app.get('/api/wallet-info',(req,res)=>{
+    res.json({publicKey:wallet.publicKey,balance:wallet.balance}) 
+    
   })
+
+  app.get("*",(req,res) =>{
+
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
 
 app.listen(HTTP_PORT, () => {
 
